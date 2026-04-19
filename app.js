@@ -380,12 +380,10 @@
         switchFlowView(desc.target || "prep", true);
         return;
       case "set-prep-round":
-        setPrepRound(desc.id || state.selectedId, desc.round || "first");
-        renderProcessModal();
+        handlePrepRoundSelection(desc.id || state.selectedId, desc.round || "first");
         return;
       case "set-review-round":
-        setReviewRound(desc.id || state.selectedId, desc.round || "first");
-        renderProcessModal();
+        handleReviewRoundSelection(desc.id || state.selectedId, desc.round || "first");
         return;
       case "quick-jump":
         openProcessPage(desc.id, desc.target || "prep");
@@ -930,13 +928,31 @@
     showToast(`${roundMeta.label}复盘已生成。`);
   }
 
+  function handlePrepRoundSelection(id, round) {
+    const normalizedRound = targetRoundKey(round) || "first";
+    const result = setPrepRound(id, normalizedRound);
+    if (!result.target) return;
+
+    renderProcessModal();
+    const roundMeta = getRoundMeta(normalizedRound);
+    if (result.changed) {
+      const hasPrep = hasPrepContentForRound(result.target, normalizedRound);
+      showToast(hasPrep ? `已切换到${roundMeta.label}内容。` : `已切换到${roundMeta.label}，当前该轮还没有面经内容。`);
+      return;
+    }
+
+    showToast(`当前已是${roundMeta.label}。`);
+  }
+
   function setPrepRound(id, round) {
-    if (!id) return;
-    if (!PREP_ROUNDS.some((item) => item.key === round)) return;
+    if (!id) return { target: null, changed: false };
+    if (!PREP_ROUNDS.some((item) => item.key === round)) return { target: null, changed: false };
     const target = findOpportunityById(id);
-    if (!target) return;
+    if (!target) return { target: null, changed: false };
     ensureOpportunityWorkflow(target);
+    const prevRound = getCurrentPrepRound(target);
     target.workflow.activeRound = round;
+    return { target, changed: prevRound !== round };
   }
 
   function getCurrentPrepRound(opp) {
@@ -954,7 +970,10 @@
     return PREP_ROUNDS.map(
       (round) => `
         <button
-          class="round-chip ${activeRound === round.key ? "is-active" : ""}"
+          type="button"
+          class="round-chip ${activeRound === round.key ? "is-active" : ""} ${hasPrepContentForRound(opp, round.key) ? "is-ready" : ""}"
+          aria-pressed="${activeRound === round.key ? "true" : "false"}"
+          title="${round.label}${hasPrepContentForRound(opp, round.key) ? "（已生成）" : "（待生成）"}"
           data-action="set-prep-round"
           data-id="${opp.id}"
           data-round="${round.key}"
@@ -966,14 +985,32 @@
     ).join("");
   }
 
+  function handleReviewRoundSelection(id, round) {
+    const normalizedRound = targetRoundKey(round) || "first";
+    const result = setReviewRound(id, normalizedRound);
+    if (!result.target) return;
+
+    renderProcessModal();
+    const roundMeta = getRoundMeta(normalizedRound);
+    if (result.changed) {
+      const hasReview = hasReviewContentForRound(result.target, normalizedRound);
+      showToast(hasReview ? `已切换到${roundMeta.label}复盘。` : `已切换到${roundMeta.label}，当前该轮还没有复盘内容。`);
+      return;
+    }
+
+    showToast(`当前已是${roundMeta.label}。`);
+  }
+
   function setReviewRound(id, round) {
-    if (!id) return;
+    if (!id) return { target: null, changed: false };
     const normalized = targetRoundKey(round);
-    if (!normalized) return;
+    if (!normalized) return { target: null, changed: false };
     const target = findOpportunityById(id);
-    if (!target) return;
+    if (!target) return { target: null, changed: false };
     ensureOpportunityWorkflow(target);
+    const prevRound = getCurrentReviewRound(target);
     target.workflow.activeReviewRound = normalized;
+    return { target, changed: prevRound !== normalized };
   }
 
   function getCurrentReviewRound(opp) {
@@ -989,7 +1026,10 @@
     return PREP_ROUNDS.map(
       (round) => `
         <button
-          class="round-chip ${activeRound === round.key ? "is-active" : ""}"
+          type="button"
+          class="round-chip ${activeRound === round.key ? "is-active" : ""} ${hasReviewContentForRound(opp, round.key) ? "is-ready" : ""}"
+          aria-pressed="${activeRound === round.key ? "true" : "false"}"
+          title="${round.label}${hasReviewContentForRound(opp, round.key) ? "（已生成）" : "（待生成）"}"
           data-action="set-review-round"
           data-id="${opp.id}"
           data-round="${round.key}"
@@ -999,6 +1039,19 @@
         </button>
       `
     ).join("");
+  }
+
+  function hasPrepContentForRound(opp, round) {
+    const normalized = targetRoundKey(round);
+    if (!normalized || !opp?.prep?.items?.length) return false;
+    return opp.prep.items.some((item) => targetRoundKey(item.round) === normalized);
+  }
+
+  function hasReviewContentForRound(opp, round) {
+    const normalized = targetRoundKey(round);
+    if (!normalized) return false;
+    const reviewState = ensureReviewState(opp);
+    return Boolean(reviewState?.rounds?.[normalized]);
   }
 
   function renderJdSection(opp) {
