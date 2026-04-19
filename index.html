@@ -1,0 +1,277 @@
+﻿<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>求职看板 · 面试全流程助手</title>
+    <link rel="stylesheet" href="styles.css?v=20260419-3" />
+  </head>
+  <body>
+    <div class="bg-shape bg-shape-a"></div>
+    <div class="bg-shape bg-shape-b"></div>
+
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand">
+          <span class="brand-logo">AI</span>
+          <div class="brand-copy">
+            <h1>求职看板</h1>
+            <p>高保真流程管理 · JD识别 · 面经准备 · 面试复盘</p>
+          </div>
+        </div>
+        <div class="topbar-actions">
+          <span id="mailbox-status" class="pill danger">邮箱未连接</span>
+          <button id="open-connect-btn" class="btn btn-ghost" data-action="open-connect">连接邮箱</button>
+        </div>
+      </header>
+
+      <section class="stat-grid">
+        <article class="stat-card is-active" data-action="filter-stat" data-stage="all">
+          <p>全部进展</p>
+          <h2 id="stat-total">0</h2>
+        </article>
+        <article class="stat-card" data-action="filter-stat" data-stage="assessment">
+          <p>测评待完成</p>
+          <h2 id="stat-assessment">0</h2>
+        </article>
+        <article class="stat-card" data-action="filter-stat" data-stage="interviewing">
+          <p>将面试</p>
+          <h2 id="stat-interview">0</h2>
+        </article>
+        <article class="stat-card" data-action="filter-stat" data-stage="waiting_result">
+          <p>等结果</p>
+          <h2 id="stat-waiting">0</h2>
+        </article>
+        <article class="stat-card" data-action="filter-stat" data-stage="closed">
+          <p>close</p>
+          <h2 id="stat-close">0</h2>
+        </article>
+        <article class="stat-card" data-action="filter-stat" data-stage="urgent">
+          <p>加急</p>
+          <h2 id="stat-urgent">0</h2>
+        </article>
+      </section>
+
+      <section class="toolbar">
+        <div class="toolbar-left">
+          <label class="input-wrap">
+            <span class="input-icon">⌕</span>
+            <input id="filter-keyword" type="text" placeholder="搜索公司或职位..." />
+          </label>
+          <label class="select-wrap">
+            <select id="filter-stage">
+              <option value="all">全部状态</option>
+              <option value="assessment">测评待完成</option>
+              <option value="interviewing">面试中</option>
+              <option value="waiting_result">等结果</option>
+              <option value="closed">close</option>
+              <option value="urgent">仅看加急</option>
+            </select>
+          </label>
+        </div>
+        <div class="ticker" id="announcement-ticker"></div>
+      </section>
+
+      <main class="content-area">
+        <section class="list-panel">
+          <ul id="job-list" class="job-list"></ul>
+        </section>
+      </main>
+    </div>
+
+    <div id="modal-overlay" class="modal-overlay hidden"></div>
+
+    <section id="process-modal" class="process-modal hidden" role="dialog" aria-modal="true">
+      <header class="process-header">
+        <div class="process-title">
+          <div class="process-title-row">
+            <h3 id="process-company">职位详情</h3>
+            <p id="process-role">点击列表卡片查看流程详情</p>
+          </div>
+          <div class="process-meta-row">
+            <span id="process-due-time" class="process-meta-item">🗓️ --</span>
+            <span class="process-meta-item">会议号/链接：</span>
+            <a id="process-meeting-link" class="meeting-link" href="#" target="_blank" rel="noreferrer">暂无链接</a>
+          </div>
+        </div>
+        <div class="process-nav">
+          <button class="btn btn-icon" data-action="close-process-modal">×</button>
+        </div>
+      </header>
+
+      <div id="process-scroll-root" class="process-scroll">
+        <article class="surface fixed-block">
+          <h4>流程时间线</h4>
+          <ul id="process-timeline" class="timeline timeline-horizontal"></ul>
+        </article>
+
+        <div class="icon-rail">
+          <button class="icon-chip" data-action="jump-icon" data-target="jd">
+            <span>📄</span>
+            <span>查看JD</span>
+          </button>
+          <button class="icon-chip" data-action="jump-icon" data-target="prep">
+            <span>🧠</span>
+            <span>面经准备</span>
+          </button>
+          <button class="icon-chip" data-action="jump-icon" data-target="review">
+            <span>📝</span>
+            <span>面试复盘</span>
+          </button>
+        </div>
+
+        <article class="surface process-block hidden" id="section-jd">
+          <div class="process-head">
+            <h4>📄 JD识别结果</h4>
+            <button class="btn btn-ghost small" data-action="open-jd-upload">上传/更新JD</button>
+          </div>
+          <div id="process-jd-content" class="process-content"></div>
+        </article>
+
+        <article class="surface process-block" id="section-prep">
+          <div class="process-head">
+            <h4>🧠 面经准备</h4>
+            <button class="btn btn-primary small" data-action="run-prep">准备面经</button>
+          </div>
+          <div id="process-prep-rounds" class="prep-round-switch"></div>
+          <div id="process-prep-content" class="process-content"></div>
+        </article>
+
+        <article class="surface process-block hidden" id="section-review">
+          <div class="process-head">
+            <h4>📝 面试复盘输出</h4>
+            <button class="btn btn-ghost small" data-action="open-review-upload">上传复盘资料</button>
+          </div>
+          <div id="process-review-rounds" class="prep-round-switch"></div>
+          <div id="process-review-content" class="process-content"></div>
+        </article>
+      </div>
+    </section>
+
+    <section id="connect-modal" class="modal hidden" role="dialog" aria-modal="true">
+      <header>
+        <h3>连接邮箱后可同步投递与流程</h3>
+        <button class="btn btn-icon" data-action="close-modal">×</button>
+      </header>
+      <p id="connect-tip" class="muted">支持 QQ 邮箱与网易邮箱。可先连接一个，后续继续追加。</p>
+      <p class="muted connect-demo-note">Demo 说明：邮箱地址与验证码可随便填写，仅用于交互演示。</p>
+
+      <div class="connect-grid">
+        <article id="mailbox-card-qq" class="connect-card">
+          <h4>QQ 邮箱</h4>
+          <div id="connect-qq-view" class="connect-connected-view hidden">
+            <p class="connect-connected-label">已连接邮箱</p>
+            <p id="connect-qq-display" class="connect-connected-email">-</p>
+            <button class="btn btn-ghost small" data-action="edit-mailbox" data-provider="qq">更换邮箱</button>
+          </div>
+          <div id="connect-qq-form" class="connect-form-view">
+            <label class="connect-field">
+              <span>邮箱地址</span>
+              <input id="connect-qq-email" type="email" placeholder="demo@qq.com" />
+            </label>
+            <label id="connect-qq-code-field" class="connect-field">
+              <span>验证码</span>
+              <input id="connect-qq-code" type="text" placeholder="输入验证码" />
+            </label>
+            <div class="connect-card-actions">
+              <button id="connect-qq-btn" class="btn btn-primary" data-action="connect-mailbox" data-provider="qq" disabled>
+                连接 QQ 邮箱
+              </button>
+              <button id="connect-qq-cancel-edit" class="btn btn-ghost hidden" data-action="cancel-mailbox-edit" data-provider="qq">
+                取消更换
+              </button>
+            </div>
+          </div>
+        </article>
+
+        <article id="mailbox-card-netease" class="connect-card">
+          <h4>网易邮箱</h4>
+          <div id="connect-netease-view" class="connect-connected-view hidden">
+            <p class="connect-connected-label">已连接邮箱</p>
+            <p id="connect-netease-display" class="connect-connected-email">-</p>
+            <button class="btn btn-ghost small" data-action="edit-mailbox" data-provider="netease">更换邮箱</button>
+          </div>
+          <div id="connect-netease-form" class="connect-form-view">
+            <label class="connect-field">
+              <span>邮箱地址</span>
+              <input id="connect-netease-email" type="email" placeholder="demo@163.com" />
+            </label>
+            <label id="connect-netease-code-field" class="connect-field">
+              <span>验证码</span>
+              <input id="connect-netease-code" type="text" placeholder="输入验证码" />
+            </label>
+            <div class="connect-card-actions">
+              <button
+                id="connect-netease-btn"
+                class="btn btn-primary"
+                data-action="connect-mailbox"
+                data-provider="netease"
+                disabled
+              >
+                连接网易邮箱
+              </button>
+              <button
+                id="connect-netease-cancel-edit"
+                class="btn btn-ghost hidden"
+                data-action="cancel-mailbox-edit"
+                data-provider="netease"
+              >
+                取消更换
+              </button>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <div id="connected-mailbox-preview" class="mini-result"></div>
+    </section>
+
+    <section id="jd-modal" class="modal hidden" role="dialog" aria-modal="true">
+      <header>
+        <h3>智能识别JD</h3>
+        <button class="btn btn-icon" data-action="close-modal">×</button>
+      </header>
+      <p class="muted">上传招聘截图（PNG/JPG/WEBP）或直接粘贴岗位描述与问题。</p>
+      <label class="dropzone">
+        <input id="jd-file" type="file" accept="image/png,image/jpeg,image/webp" />
+        <span id="jd-file-label">点击上传或拖拽截图到此处</span>
+      </label>
+      <textarea id="jd-text" rows="5" placeholder="可粘贴JD文本或你最想解决的问题..."></textarea>
+      <div id="jd-result-preview" class="mini-result"></div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" data-action="close-modal">取消</button>
+        <button class="btn btn-primary" data-action="submit-jd">开始识别</button>
+      </div>
+    </section>
+
+    <section id="review-modal" class="modal hidden" role="dialog" aria-modal="true">
+      <header>
+        <h3>上传面试复盘资料</h3>
+        <button class="btn btn-icon" data-action="close-modal">×</button>
+      </header>
+      <p class="muted">支持文档、图片、音频（txt/doc/docx/pdf/png/jpg/webp/mp3/wav/m4a）。</p>
+      <label class="dropzone">
+        <input id="review-file" type="file" accept=".txt,.doc,.docx,.pdf,image/*,audio/*" />
+        <span id="review-file-label">点击上传复盘材料</span>
+      </label>
+      <textarea id="review-text" rows="5" placeholder="可追加你对面试表现的自评、追问细节..."></textarea>
+      <div id="review-result-preview" class="mini-result"></div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" data-action="close-modal">取消</button>
+        <button class="btn btn-primary" data-action="submit-review">生成复盘</button>
+      </div>
+    </section>
+
+    <div id="loading-overlay" class="loading-overlay hidden">
+      <div class="loading-card">
+        <div class="spinner"></div>
+        <p id="loading-text">处理中...</p>
+      </div>
+    </div>
+
+    <div id="toast" class="toast hidden"></div>
+
+    <script src="app.js?v=20260419-3"></script>
+  </body>
+</html>
+

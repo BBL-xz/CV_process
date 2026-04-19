@@ -1,0 +1,41 @@
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# IDE / Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Node (if used later)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Python cache (if local scripts are used)
+__pycache__/
+*.pyc
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# Local runtime / temp
+*.log
+*.tmp
+*.bak
+dist/
+build/
+.vercel/
+
+# Codex / local agent state
+.omx/
+
+# Product docs (exclude from GitHub repo)
+PRD-email-first-job-board.md
+IA-wireframes-email-first-board.md
