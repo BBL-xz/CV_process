@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>求职看板 · 面试全流程助手</title>
-    <link rel="stylesheet" href="styles.css?v=20260419-6" />
+    <link rel="stylesheet" href="styles.css?v=20260419-8" />
   </head>
   <body>
     <div class="bg-shape bg-shape-a"></div>
@@ -13,10 +13,29 @@
     <div class="app-shell">
       <header class="topbar">
         <div class="brand">
-          <span class="brand-logo">AI</span>
+          <span class="brand-logo">
+            <img class="brand-logo-image" src="icon.png" alt="求职看板 icon" />
+          </span>
           <div class="brand-copy">
             <h1>求职看板</h1>
-            <p>高保真流程管理 · JD识别 · 面经准备 · 面试复盘</p>
+            <div class="brand-feature-row" aria-label="产品能力">
+              <span class="brand-feature-item">
+                <img class="feature-icon" src="icon.png" alt="简化求职流程" />
+                <span>简化求职流程</span>
+              </span>
+              <span class="brand-feature-item">
+                <img class="feature-icon" src="icon.png" alt="智能识别JD" />
+                <span>智能识别JD</span>
+              </span>
+              <span class="brand-feature-item">
+                <img class="feature-icon" src="icon.png" alt="一键面经准备" />
+                <span>一键面经准备</span>
+              </span>
+              <span class="brand-feature-item">
+                <img class="feature-icon" src="icon.png" alt="面试复盘" />
+                <span>面试复盘</span>
+              </span>
+            </div>
           </div>
         </div>
         <div class="topbar-actions">
@@ -107,15 +126,15 @@
 
         <div class="icon-rail">
           <button class="icon-chip" data-action="jump-icon" data-target="jd">
-            <span>📄</span>
-            <span>查看JD</span>
+            <img class="icon-chip-image" src="icon.png" alt="智能识别JD" />
+            <span>智能识别JD</span>
           </button>
           <button class="icon-chip" data-action="jump-icon" data-target="prep">
-            <span>🧠</span>
-            <span>面经准备</span>
+            <img class="icon-chip-image" src="icon.png" alt="一键面经准备" />
+            <span>一键面经准备</span>
           </button>
           <button class="icon-chip" data-action="jump-icon" data-target="review">
-            <span>📝</span>
+            <img class="icon-chip-image" src="icon.png" alt="面试复盘" />
             <span>面试复盘</span>
           </button>
         </div>
@@ -271,7 +290,7 @@
 
     <div id="toast" class="toast hidden"></div>
 
-    <script src="app.js?v=20260419-6"></script>
+    <script src="app.js?v=20260419-8"></script>
   </body>
 </html>
 

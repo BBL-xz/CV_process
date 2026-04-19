@@ -92,16 +92,46 @@ body {
   letter-spacing: 0.04em;
 }
 
+.brand-logo-image {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
 .brand-copy h1 {
   margin: 0;
   font-size: 34px;
   letter-spacing: 0.01em;
 }
 
-.brand-copy p {
-  margin: 4px 0 0;
-  color: var(--muted);
-  font-size: 14px;
+.brand-feature-row {
+  margin-top: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.brand-feature-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  padding: 4px 10px;
+  border: 1px solid #dfe3f0;
+  background: rgba(255, 255, 255, 0.9);
+  color: #545d77;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.feature-icon {
+  width: 16px;
+  height: 16px;
+  display: block;
+  object-fit: cover;
+  border-radius: 50%;
 }
 
 .topbar-actions {
@@ -713,6 +743,14 @@ textarea:focus {
   font-weight: 700;
   color: #343c53;
   font-size: 16px;
+}
+
+.icon-chip-image {
+  width: 22px;
+  height: 22px;
+  display: block;
+  object-fit: cover;
+  border-radius: 50%;
 }
 
 .icon-chip.is-fixed {
