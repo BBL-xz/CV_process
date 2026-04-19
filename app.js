@@ -959,9 +959,9 @@
     ensureOpportunityWorkflow(opp);
     const step = getWorkflowStep(opp);
     const inferred = inferLatestInterviewRoundFromStepTimes(opp.workflow.stepTimes || {}, step);
-    if (step === "hr" || step === "offer") return inferred || "first";
     const active = targetRoundKey(opp.workflow.activeRound);
     if (active) return active;
+    if (step === "hr" || step === "offer") return inferred || "first";
     return stepToRound(step) || inferred || "first";
   }
 
