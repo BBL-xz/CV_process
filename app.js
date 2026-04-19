@@ -1456,10 +1456,7 @@
       if (!targetRoundKey(opp.workflow.activeRound)) {
         opp.workflow.activeRound = stepToRound(currentStep) || inferredRound || "first";
       }
-      if (currentStep === "hr" || currentStep === "offer") {
-        opp.workflow.activeRound = inferredRound || "first";
-      }
-      if (!targetRoundKey(opp.workflow.activeReviewRound) || currentStep === "hr" || currentStep === "offer") {
+      if (!targetRoundKey(opp.workflow.activeReviewRound)) {
         opp.workflow.activeReviewRound = inferredRound || "first";
       }
       backfillReachedStepTimes(opp);
