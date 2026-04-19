@@ -10,7 +10,6 @@
   };
 
   const ANNOUNCEMENTS = [
-    "全盘面试总结功能已上线：上传资料后自动生成复盘与下一步动作。",
     "JD识别支持截图+文本混合输入，识别结果会自动写入流程卡片。",
     "点击“面经准备”，系统会自动整理关键词、问题和作答思路。",
   ];
@@ -602,6 +601,8 @@
     if (round) {
       target.workflow.activeRound = round;
       target.workflow.activeReviewRound = round;
+      target.workflow.activeRoundSource = "auto";
+      target.workflow.activeReviewRoundSource = "auto";
     }
 
     if (update.label) {
@@ -952,17 +953,16 @@
     ensureOpportunityWorkflow(target);
     const prevRound = getCurrentPrepRound(target);
     target.workflow.activeRound = round;
+    target.workflow.activeRoundSource = "manual";
     return { target, changed: prevRound !== round };
   }
 
   function getCurrentPrepRound(opp) {
     ensureOpportunityWorkflow(opp);
-    const step = getWorkflowStep(opp);
-    const inferred = inferLatestInterviewRoundFromStepTimes(opp.workflow.stepTimes || {}, step);
     const active = targetRoundKey(opp.workflow.activeRound);
     if (active) return active;
-    if (step === "hr" || step === "offer") return inferred || "first";
-    return stepToRound(step) || inferred || "first";
+    const step = opp.workflow?.currentStep || "assessment";
+    return inferAutoPrepRound(step, opp.dueAt);
   }
 
   function renderPrepRoundSwitch(opp) {
@@ -1010,6 +1010,7 @@
     ensureOpportunityWorkflow(target);
     const prevRound = getCurrentReviewRound(target);
     target.workflow.activeReviewRound = normalized;
+    target.workflow.activeReviewRoundSource = "manual";
     return { target, changed: prevRound !== normalized };
   }
 
@@ -1017,8 +1018,8 @@
     ensureOpportunityWorkflow(opp);
     const selected = targetRoundKey(opp.workflow.activeReviewRound);
     if (selected) return selected;
-    const latest = inferLatestInterviewRound(opp);
-    return latest || "first";
+    const step = opp.workflow?.currentStep || "assessment";
+    return inferAutoReviewRound(step, opp.dueAt);
   }
 
   function renderReviewRoundSwitch(opp) {
@@ -1452,12 +1453,18 @@
     if (!opp) return;
     if (opp.workflow && opp.workflow.currentStep && opp.workflow.stepTimes) {
       const currentStep = opp.workflow.currentStep || "assessment";
-      const inferredRound = inferLatestInterviewRoundFromStepTimes(opp.workflow.stepTimes || {}, currentStep);
-      if (!targetRoundKey(opp.workflow.activeRound)) {
-        opp.workflow.activeRound = stepToRound(currentStep) || inferredRound || "first";
+      const prepSource = opp.workflow.activeRoundSource === "manual" ? "manual" : "auto";
+      const reviewSource = opp.workflow.activeReviewRoundSource === "manual" ? "manual" : "auto";
+      opp.workflow.activeRoundSource = prepSource;
+      opp.workflow.activeReviewRoundSource = reviewSource;
+
+      if (prepSource !== "manual" || !targetRoundKey(opp.workflow.activeRound)) {
+        opp.workflow.activeRound = inferAutoPrepRound(currentStep, opp.dueAt);
+        opp.workflow.activeRoundSource = "auto";
       }
-      if (!targetRoundKey(opp.workflow.activeReviewRound)) {
-        opp.workflow.activeReviewRound = inferredRound || "first";
+      if (reviewSource !== "manual" || !targetRoundKey(opp.workflow.activeReviewRound)) {
+        opp.workflow.activeReviewRound = inferAutoReviewRound(currentStep, opp.dueAt);
+        opp.workflow.activeReviewRoundSource = "auto";
       }
       backfillReachedStepTimes(opp);
       ensureReviewState(opp);
@@ -1480,8 +1487,10 @@
 
     opp.workflow = {
       currentStep,
-      activeRound: stepToRound(currentStep) || round || "first",
-      activeReviewRound: inferLatestInterviewRoundFromStepTimes(stepTimes, currentStep),
+      activeRound: inferAutoPrepRound(currentStep, opp.dueAt),
+      activeRoundSource: "auto",
+      activeReviewRound: inferAutoReviewRound(currentStep, opp.dueAt),
+      activeReviewRoundSource: "auto",
       stepTimes,
       updatedAt: now(),
     };
@@ -1622,13 +1631,10 @@
     if (time && !opp.workflow.stepTimes[normalizedStep]) {
       opp.workflow.stepTimes[normalizedStep] = time;
     }
-    const round = targetRoundKey(
-      stepToRound(normalizedStep) || inferLatestInterviewRoundFromStepTimes(opp.workflow.stepTimes || {}, normalizedStep)
-    );
-    if (round) {
-      opp.workflow.activeRound = round;
-      opp.workflow.activeReviewRound = round;
-    }
+    opp.workflow.activeRound = inferAutoPrepRound(normalizedStep, opp.dueAt);
+    opp.workflow.activeRoundSource = "auto";
+    opp.workflow.activeReviewRound = inferAutoReviewRound(normalizedStep, opp.dueAt);
+    opp.workflow.activeReviewRoundSource = "auto";
     backfillReachedStepTimes(opp);
     opp.workflow.updatedAt = now();
     syncLegacyStageFromWorkflow(opp);
@@ -1668,6 +1674,36 @@
 
   function isInterviewStep(step) {
     return step === "first" || step === "second" || step === "third";
+  }
+
+  function inferAutoPrepRound(step, dueAt) {
+    if (step === "hr" || step === "offer") return "third";
+    if (!isInterviewStep(step)) return "first";
+    return isDueTimePassed(dueAt) ? nextInterviewRound(step) : step;
+  }
+
+  function inferAutoReviewRound(step, dueAt) {
+    if (step === "hr" || step === "offer") return "third";
+    if (!isInterviewStep(step)) return "first";
+    return isDueTimePassed(dueAt) ? step : prevInterviewRound(step);
+  }
+
+  function nextInterviewRound(round) {
+    if (round === "first") return "second";
+    if (round === "second") return "third";
+    return "third";
+  }
+
+  function prevInterviewRound(round) {
+    if (round === "third") return "second";
+    if (round === "second") return "first";
+    return "first";
+  }
+
+  function isDueTimePassed(value) {
+    const time = parseTime(value);
+    if (time === Number.MAX_SAFE_INTEGER) return false;
+    return time <= Date.now();
   }
 
   function targetRoundKey(value) {
