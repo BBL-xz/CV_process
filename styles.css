@@ -84,20 +84,8 @@ body {
   width: 42px;
   height: 42px;
   border-radius: 12px;
-  display: grid;
-  place-items: center;
-  font-weight: 800;
-  background: linear-gradient(145deg, #0b0b0d, #1d1d25);
-  color: #fff;
-  letter-spacing: 0.04em;
-}
-
-.brand-logo-image {
-  width: 100%;
-  height: 100%;
   display: block;
-  object-fit: cover;
-  border-radius: 12px;
+  overflow: hidden;
 }
 
 .brand-copy h1 {
@@ -106,32 +94,17 @@ body {
   letter-spacing: 0.01em;
 }
 
-.brand-feature-row {
-  margin-top: 6px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.brand-feature-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  border-radius: 999px;
-  padding: 4px 10px;
-  border: 1px solid #dfe3f0;
-  background: rgba(255, 255, 255, 0.9);
-  color: #545d77;
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.feature-icon {
-  width: 16px;
-  height: 16px;
+.brand-logo-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
   display: block;
-  object-fit: cover;
-  border-radius: 50%;
+}
+
+.brand-copy p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 14px;
 }
 
 .topbar-actions {
@@ -745,14 +718,6 @@ textarea:focus {
   font-size: 16px;
 }
 
-.icon-chip-image {
-  width: 22px;
-  height: 22px;
-  display: block;
-  object-fit: cover;
-  border-radius: 50%;
-}
-
 .icon-chip.is-fixed {
   cursor: default;
   opacity: 0.82;
@@ -1060,6 +1025,11 @@ textarea {
 }
 
 @media (max-width: 820px) {
+  .brand-logo {
+    width: 38px;
+    height: 38px;
+  }
+
   .brand-copy h1 {
     font-size: 28px;
   }
@@ -1144,7 +1114,7 @@ textarea {
   }
 
   .icon-rail {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .connect-grid {
@@ -1167,6 +1137,11 @@ textarea {
     justify-content: space-between;
   }
 
+  .brand-logo {
+    width: 34px;
+    height: 34px;
+  }
+
   .stat-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -1185,5 +1160,9 @@ textarea {
     right: 0;
     bottom: 0;
     border-left: 0;
+  }
+
+  .icon-rail {
+    grid-template-columns: 1fr;
   }
 }
